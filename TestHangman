@@ -1,0 +1,35 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import openai
+
+class TestHangman(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def test_hangman(self):
+        driver = self.driver
+        driver.get("https://example.com/games/hangman")
+
+        # GPT загадывает слово
+        openai.api_key = "your-api-key"
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt="Загадай слово для виселицы",
+            max_tokens=10
+        )
+        gpt_word = response['choices'][0]['text'].strip()
+
+        # Игрок вводит буквы
+        for letter in gpt_word:
+            driver.find_element(By.ID, "letter_input").send_keys(letter)
+            driver.find_element(By.ID, "guess_btn").click()
+
+        # Проверка победы
+        self.assertIn("Вы выиграли!", driver.page_source)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
