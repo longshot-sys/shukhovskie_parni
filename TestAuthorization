@@ -1,0 +1,32 @@
+
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+class TestAuthorization(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def test_registration_and_login(self):
+        driver = self.driver
+        driver.get("https://example.com/register")
+
+        # Регистрация
+        driver.find_element(By.ID, "username").send_keys("test_user")
+        driver.find_element(By.ID, "password").send_keys("test_password")
+        driver.find_element(By.ID, "register_btn").click()
+
+        # Авторизация
+        driver.get("https://example.com/login")
+        driver.find_element(By.ID, "username").send_keys("test_user")
+        driver.find_element(By.ID, "password").send_keys("test_password")
+        driver.find_element(By.ID, "login_btn").click()
+
+        # Проверка успешной авторизации
+        self.assertIn("Welcome, test_user", driver.page_source)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
