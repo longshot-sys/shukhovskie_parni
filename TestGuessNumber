@@ -1,0 +1,38 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import random
+import openai
+
+class TestGuessNumber(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def test_guess_number(self):
+        driver = self.driver
+        driver.get("https://example.com/games/guess_number")
+
+        # Загадка числа GPT
+        openai.api_key = "your-api-key"
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt="Загадай число от 1 до 100",
+            max_tokens=10
+        )
+        gpt_number = int(response['choices'][0]['text'].strip())
+
+        # Ввод случайного числа и проверка ответа
+        guessed_number = random.randint(1, 100)
+        driver.find_element(By.ID, "guess_input").send_keys(str(guessed_number))
+        driver.find_element(By.ID, "guess_btn").click()
+
+        if guessed_number == gpt_number:
+            self.assertIn("Вы угадали число!", driver.page_source)
+        else:
+            self.assertIn("Попробуйте еще раз", driver.page_source)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
