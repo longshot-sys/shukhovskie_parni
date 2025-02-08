@@ -1,0 +1,35 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import openai
+
+class TestTicTacToe(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def test_tic_tac_toe(self):
+        driver = self.driver
+        driver.get("https://example.com/games/tic_tac_toe")
+
+        # Ход игрока
+        driver.find_element(By.ID, "cell_0").click()
+
+        # Ход GPT
+        openai.api_key = "your-api-key"
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt="Сделай ход в крестики-нолики",
+            max_tokens=10
+        )
+        gpt_move = int(response['choices'][0]['text'].strip())
+        driver.find_element(By.ID, f"cell_{gpt_move}").click()
+
+        # Проверка победителя
+        self.assertIn("Победитель", driver.page_source)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
+
