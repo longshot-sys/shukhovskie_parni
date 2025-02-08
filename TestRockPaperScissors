@@ -1,0 +1,43 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import random
+import openai
+
+class TestRockPaperScissors(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def test_rock_paper_scissors(self):
+        driver = self.driver
+        driver.get("https://example.com/games/rock_paper_scissors")
+
+        # Ход игрока
+        player_choice = "камень"
+        driver.find_element(By.ID, player_choice).click()
+
+        # Ход GPT
+        openai.api_key = "your-api-key"
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt="Выбери камень, ножницы или бумагу",
+            max_tokens=10
+        )
+        gpt_choice = response['choices'][0]['text'].strip()
+
+        # Проверка результата
+        if (player_choice == "камень" and gpt_choice == "ножницы") or \
+           (player_choice == "ножницы" and gpt_choice == "бумага") or \
+           (player_choice == "бумага" and gpt_choice == "камень"):
+            self.assertIn("Вы выиграли!", driver.page_source)
+        elif player_choice == gpt_choice:
+            self.assertIn("Ничья", driver.page_source)
+        else:
+            self.assertIn("Вы проиграли", driver.page_source)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
+
